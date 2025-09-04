@@ -1,14 +1,21 @@
 from pydantic_settings import BaseSettings
-import os
+from urllib.parse import quote_plus
 
 class Settings(BaseSettings):
-    # ATENÇÃO: Substitua '[YOUR-PASSWORD]' pela sua senha real do banco de dados.
-    # É mais seguro usar variáveis de ambiente para isso em produção.
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "postgresql://postgres:[YOUR-PASSWORD]@db.podtxoestfoxscdqrlgi.supabase.co:5432/postgres")
+    DB_USER: str
+    DB_PASSWORD: str
+    DB_HOST: str
+    DB_PORT: int
+    DB_NAME: str
     API_V1_STR: str = "/api/v1"
 
+    @property
+    def DATABASE_URL(self) -> str:
+        pwd = quote_plus(self.DB_PASSWORD)
+        return f"postgresql+psycopg2://{self.DB_USER}:{pwd}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}?sslmode=require"
+
     class Config:
-        case_sensitive = True
         env_file = ".env"
+        case_sensitive = True
 
 settings = Settings()
